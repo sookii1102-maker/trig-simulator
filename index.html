@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <!-- iOS/iPad 뷰포트: user-scalable=no로 핀치줌 방지, viewport-fit=cover로 노치 대응 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>복합 삼각함수 × 직선 교점 시뮬레이터 | 수능 수학 킬러 대비</title>
+  <meta name="description" content="수능 수학 미적분/수학1 준킬러~킬러 문항 대비. 사인·코사인·탄젠트 절댓값 함수와 직선의 교점 시뮬레이터.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="site-header">
+    <div class="header-content">
+      <div class="header-badge">수능 수학 킬러 대비</div>
+      <h1>복합 삼각함수 × 직선 <span class="accent">교점 시뮬레이터</span></h1>
+      <p class="header-sub">절댓값 삼각함수와 임의의 직선의 교점 변화를 실시간으로 탐구하세요</p>
+    </div>
+  </header>
+
+  <!-- ===== MAIN TABS ===== -->
+  <nav class="main-tabs" role="tablist" aria-label="주요 섹션">
+    <button class="tab-btn active" data-tab="simulator" role="tab" aria-selected="true">📊 시뮬레이터</button>
+    <button class="tab-btn" data-tab="theory" role="tab" aria-selected="false">📚 이론 정리</button>
+    <button class="tab-btn" data-tab="problems" role="tab" aria-selected="false">📝 예시 문제</button>
+  </nav>
+
+  <!-- ===== SIMULATOR TAB ===== -->
+  <section id="tab-simulator" class="tab-content active">
+    <div class="simulator-layout">
+
+      <!-- LEFT: Controls -->
+      <aside class="controls-panel" id="controls-panel">
+
+        <!-- Mobile: 접기/펼치기 토글 -->
+        <button class="controls-toggle" id="controls-toggle" aria-expanded="true">
+          <span class="toggle-label">⚙️ 매개변수 설정</span>
+          <span class="toggle-arrow" id="toggle-arrow">▲</span>
+        </button>
+
+        <div class="controls-body" id="controls-body">
+          <!-- Function Type Selector -->
+          <div class="control-section">
+            <h2 class="section-title">함수 유형 선택</h2>
+            <div class="func-type-grid">
+              <button class="func-btn active" id="btn-sin" data-func="sin" aria-pressed="true">
+                <span class="func-icon">∿</span>
+                <span class="func-name">사인 (Sin)</span>
+                <span class="func-label">y=|A·sin(B(x−C))+D|</span>
+              </button>
+              <button class="func-btn" id="btn-cos" data-func="cos" aria-pressed="false">
+                <span class="func-icon">∿</span>
+                <span class="func-name">코사인 (Cos)</span>
+                <span class="func-label">y=|A·cos(B(x−C))+D|</span>
+              </button>
+              <button class="func-btn" id="btn-tan" data-func="tan" aria-pressed="false">
+                <span class="func-icon">⋰</span>
+                <span class="func-name">탄젠트 (Tan)</span>
+                <span class="func-label">y=|A·tan(B(x−C))+D|</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Sliders: Trigonometric -->
+          <div class="control-section">
+            <h2 class="section-title">삼각함수 매개변수</h2>
+
+            <div class="slider-group">
+              <div class="slider-label-row">
+                <label for="slider-A">진폭 <span class="math">A</span></label>
+                <div class="value-badge" id="val-A">1.0</div>
+              </div>
+              <div class="slider-desc">함수의 최대값/최소값 크기</div>
+              <input type="range" id="slider-A" min="0.5" max="3" step="0.1" value="1" class="slider">
+              <div class="slider-ticks"><span>0.5</span><span>1.75</span><span>3.0</span></div>
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-label-row">
+                <label for="slider-B">주기 계수 <span class="math">B</span></label>
+                <div class="value-badge" id="val-B">1.0</div>
+              </div>
+              <div class="slider-desc">주기 = 2π/B (탄젠트: π/B)</div>
+              <input type="range" id="slider-B" min="0.5" max="5" step="0.1" value="1" class="slider">
+              <div class="slider-ticks"><span>0.5</span><span>2.75</span><span>5.0</span></div>
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-label-row">
+                <label for="slider-C">x축 이동 <span class="math">C</span></label>
+                <div class="value-badge" id="val-C">0.0</div>
+              </div>
+              <div class="slider-desc">그래프를 좌우로 평행이동</div>
+              <input type="range" id="slider-C" min="-3" max="3" step="0.1" value="0" class="slider">
+              <div class="slider-ticks"><span>-3</span><span>0</span><span>3</span></div>
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-label-row">
+                <label for="slider-D">y축 이동 <span class="math">D</span> <span class="tag">폴딩포인트</span></label>
+                <div class="value-badge" id="val-D">0.0</div>
+              </div>
+              <div class="slider-desc">절댓값이 꺾이는 기준축 위치</div>
+              <input type="range" id="slider-D" min="-2" max="2" step="0.1" value="0" class="slider">
+              <div class="slider-ticks"><span>-2</span><span>0</span><span>2</span></div>
+            </div>
+          </div>
+
+          <!-- Sliders: Line -->
+          <div class="control-section">
+            <h2 class="section-title">직선 매개변수</h2>
+
+            <div class="slider-group">
+              <div class="slider-label-row">
+                <label for="slider-m">직선 기울기 <span class="math">m</span></label>
+                <div class="value-badge" id="val-m">0.30</div>
+              </div>
+              <div class="slider-desc">직선의 기울기 (양수/음수)</div>
+              <input type="range" id="slider-m" min="-3" max="3" step="0.01" value="0.3" class="slider slider-line">
+              <div class="slider-ticks"><span>-3</span><span>0</span><span>3</span></div>
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-label-row">
+                <label for="slider-n">직선 y절편 <span class="math">n</span></label>
+                <div class="value-badge" id="val-n">0.5</div>
+              </div>
+              <div class="slider-desc">직선이 y축과 만나는 점</div>
+              <input type="range" id="slider-n" min="-3" max="3" step="0.1" value="0.5" class="slider slider-line">
+              <div class="slider-ticks"><span>-3</span><span>0</span><span>3</span></div>
+            </div>
+          </div>
+
+          <!-- Reset & Formula -->
+          <button class="reset-btn" id="reset-btn">↺ 기본값으로 초기화</button>
+
+          <div class="formula-display" id="formula-display">
+            <div class="formula-title">현재 함수식</div>
+            <div class="formula-trig" id="formula-trig">y = |sin(x)|</div>
+            <div class="formula-line" id="formula-line">y = 0.3x + 0.5</div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- RIGHT: Graph -->
+      <main class="graph-panel">
+        <!-- Intersection Info Bar -->
+        <div class="info-bar">
+          <div class="intersection-count">
+            <span class="count-label">교점의 개수</span>
+            <span class="count-value" id="intersection-count">-</span>
+            <span class="count-unit">개</span>
+          </div>
+          <div class="intersection-coords" id="intersection-list"></div>
+        </div>
+
+        <!-- Canvas -->
+        <div class="canvas-container" id="canvas-container">
+          <canvas id="graph-canvas" aria-label="삼각함수와 직선 그래프"></canvas>
+        </div>
+
+        <!-- Legend -->
+        <div class="graph-legend">
+          <div class="legend-item">
+            <span class="legend-color trig-color"></span>
+            <span>절댓값 삼각함수</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color orig-color"></span>
+            <span>원래 함수 (점선)</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color line-color"></span>
+            <span>직선 y=mx+n</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot inter-dot"></span>
+            <span>교점</span>
+          </div>
+        </div>
+
+        <!-- Tip Box -->
+        <div class="tip-box">
+          <span class="tip-icon">💡</span>
+          <span id="tip-text">슬라이더를 조작하여 교점의 개수 변화를 관찰하세요. D값을 바꾸면 절댓값 꺾임 위치가 달라집니다!</span>
+        </div>
+      </main>
+    </div>
+  </section>
+
+  <!-- ===== THEORY TAB ===== -->
+  <section id="tab-theory" class="tab-content">
+    <div class="theory-layout">
+
+      <h2 class="theory-main-title">📚 핵심 이론 정리</h2>
+      <p class="theory-intro">수능 수학 킬러 문항에서 자주 출제되는 절댓값 삼각함수와 직선의 교점 유형을 체계적으로 정리합니다.</p>
+
+      <!-- Card 1 -->
+      <div class="theory-card">
+        <div class="theory-card-header sin-header">
+          <span class="theory-icon">1</span>
+          <h3>절댓값 사인 함수의 기본 구조</h3>
+        </div>
+        <div class="theory-card-body">
+          <div class="formula-box">y = |A · sin(B(x − C)) + D|</div>
+          <div class="theory-grid">
+            <div class="theory-item">
+              <div class="theory-item-title">📌 A (진폭)</div>
+              <div class="theory-item-desc">그래프의 최대·최솟값 범위를 결정. |A|sin 형태에서 최댓값은 |A|+|D|, 최솟값은 D에 따라 달라짐.</div>
+            </div>
+            <div class="theory-item">
+              <div class="theory-item-title">📌 B (주기 계수)</div>
+              <div class="theory-item-desc">주기 = 2π/B. B가 클수록 주기가 짧아져 단위 구간 내 교점 수가 늘어남.</div>
+            </div>
+            <div class="theory-item">
+              <div class="theory-item-title">📌 C (위상이동)</div>
+              <div class="theory-item-desc">그래프를 x방향으로 C만큼 평행이동. C&gt;0이면 오른쪽, C&lt;0이면 왼쪽.</div>
+            </div>
+            <div class="theory-item">
+              <div class="theory-item-title">📌 D (수직이동 / 폴딩포인트)</div>
+              <div class="theory-item-desc">|sin + D| 구조에서 D = 0이면 일반 |sin|. |D|&gt;1이면 절댓값 꺾임이 사라짐.</div>
+            </div>
+          </div>
+          <div class="key-insight">
+            <div class="insight-title">🔑 킬러 포인트: D값과 교점 개수의 관계</div>
+            <p>y = |sin(x) + D|에서:</p>
+            <ul>
+              <li><strong>|D| &gt; 1 (예: D = 1.5):</strong> sin(x)+D &gt; 0 항상 → 절댓값 기호 제거 가능. 단조적인 파형</li>
+              <li><strong>D = 0:</strong> 반주기마다 x축을 "반사"하여 솟구치는 형태 → 교점 수 최대</li>
+              <li><strong>D = −1:</strong> sin(x)−1 ≤ 0 (sin=1일 때만 0) → 거의 0에 붙어있는 형태</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="theory-card">
+        <div class="theory-card-header cos-header">
+          <span class="theory-icon">2</span>
+          <h3>절댓값 코사인 함수의 특징</h3>
+        </div>
+        <div class="theory-card-body">
+          <div class="formula-box">y = |A · cos(B(x − C)) + D|</div>
+          <div class="theory-grid">
+            <div class="theory-item">
+              <div class="theory-item-title">📌 사인과의 차이</div>
+              <div class="theory-item-desc">cos(x)=sin(x+π/2). x=0에서 cos(0)=1로 시작하므로 초기 교점 분석이 달라짐.</div>
+            </div>
+            <div class="theory-item">
+              <div class="theory-item-title">📌 x=0에서의 초기값</div>
+              <div class="theory-item-desc">|cos(0)|=1, |sin(0)|=0. x=0 부근 직선과의 교점은 코사인이 더 많을 수 있음.</div>
+            </div>
+            <div class="theory-item">
+              <div class="theory-item-title">📌 우함수 특성</div>
+              <div class="theory-item-desc">cos(x)는 우함수. C=0이면 y축에 대칭. 절댓값 적용 후 π-주기 우함수.</div>
+            </div>
+            <div class="theory-item">
+              <div class="theory-item-title">📌 수능 출제 패턴</div>
+              <div class="theory-item-desc">구간 [0, kπ]에서 교점의 개수 = n이 되도록 m, n을 구하는 유형. C 조작으로 대칭축 이동.</div>
+            </div>
+          </div>
+          <div class="key-insight cos-insight">
+            <div class="insight-title">🔑 킬러 포인트: 코사인의 극값 위치</div>
+            <p>y = |cos(B·x)|의 최대값 위치: x = 0, π/B, 2π/B, ...</p>
+            <p>y = |cos(B·x)|의 최솟값(0) 위치: x = π/(2B), 3π/(2B), ...</p>
+            <ul>
+              <li>직선이 최대값 <strong>위를 지나면</strong> 그 주기에서 교점 없음</li>
+              <li>직선이 최대값 <strong>위치에서 접하면</strong> 교점 1개 (접점)</li>
+              <li>직선이 최솟값과 최댓값 <strong>사이를 지나면</strong> 교점 2개</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="theory-card">
+        <div class="theory-card-header tan-header">
+          <span class="theory-icon">3</span>
+          <h3>절댓값 탄젠트 함수의 분석</h3>
+        </div>
+        <div class="theory-card-body">
+          <div class="formula-box">y = |A · tan(B(x − C)) + D|</div>
+          <div class="theory-grid">
+            <div class="theory-item">
+              <div class="theory-item-title">📌 주기와 점근선</div>
+              <div class="theory-item-desc">tan의 주기 = π/B. 점근선: x = C + π/(2B) + nπ/B. 절댓값 적용 시 주기 π/(2B)로 단축!</div>
+            </div>
+            <div class="theory-item">
+              <div class="theory-item-title">📌 절댓값의 효과</div>
+              <div class="theory-item-desc">|tan(x)|는 음의 값이 위로 반사. 주기 π → π/2. 각 반주기에서 0→+∞ 패턴 반복.</div>
+            </div>
+            <div class="theory-item">
+              <div class="theory-item-title">📌 직선과의 교점</div>
+              <div class="theory-item-desc">|tan|은 단조증가 구간별로 직선과 최대 1개. 기울기가 너무 크면 교점 없음.</div>
+            </div>
+            <div class="theory-item">
+              <div class="theory-item-title">📌 D값의 역할</div>
+              <div class="theory-item-desc">D≠0이면 |tan+D|에서 꺾이는 위치 이동. D&lt;0이면 아래쪽 반사로 새 극소값 생성.</div>
+            </div>
+          </div>
+          <div class="key-insight tan-insight">
+            <div class="insight-title">🔑 킬러 포인트: 탄젠트 점근선 구간 분석</div>
+            <p>점근선 사이의 각 구간에서:</p>
+            <ul>
+              <li>tan: −∞→0→+∞ → |tan|: +∞→0→+∞ (V자 형태)</li>
+              <li>직선 y=mx+n이 각 V자와 만나는 횟수 분석</li>
+              <li><strong>주의:</strong> 점근선 근처에서 교점은 항상 1개 이상</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 4: Strategy -->
+      <div class="theory-card">
+        <div class="theory-card-header strat-header">
+          <span class="theory-icon">★</span>
+          <h3>교점 개수 분석 전략 (수능 실전)</h3>
+        </div>
+        <div class="theory-card-body">
+          <div class="strategy-steps">
+            <div class="step">
+              <div class="step-num">STEP 1</div>
+              <div class="step-content">
+                <div class="step-title">주기 확인 &amp; 구간 분할</div>
+                <div class="step-desc">B값으로 주기를 계산하고, 주어진 x 구간에 몇 개의 주기가 포함되는지 파악. 각 주기별로 독립 분석.</div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">STEP 2</div>
+              <div class="step-content">
+                <div class="step-title">극값(최대/최소) 위치 계산</div>
+                <div class="step-desc">각 주기에서 극대·극소값과 그 x좌표 파악. C(위상이동) 고려하여 정확한 x값 산출.</div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">STEP 3</div>
+              <div class="step-content">
+                <div class="step-title">D값으로 절댓값 꺾임 분석</div>
+                <div class="step-desc">f(x)+D=0이 되는 지점이 꺾임점. 꺾임점에서 직선과의 관계 분석.</div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">STEP 4</div>
+              <div class="step-content">
+                <div class="step-title">직선과 각 호(arc)의 교점 수 세기</div>
+                <div class="step-desc">각 단조 구간에서 직선이 삼각함수 그래프를 몇 번 가로지르는지 분석.</div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">STEP 5</div>
+              <div class="step-content">
+                <div class="step-title">경계 조건 확인</div>
+                <div class="step-desc">x=0 또는 구간 끝점에서의 교점 여부. 절댓값 꺾임점이 직선 위/아래에 있는지 판별.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== PROBLEMS TAB ===== -->
+  <section id="tab-problems" class="tab-content">
+    <div class="problems-layout">
+
+      <h2 class="theory-main-title">📝 예시 문제 &amp; 기출 유형</h2>
+      <p class="theory-intro">각 문제 아래의 <strong>'시뮬레이터에서 확인'</strong> 버튼을 클릭하면 해당 설정이 자동으로 적용됩니다.</p>
+
+      <!-- Problem Filter -->
+      <div class="problem-filter">
+        <button class="filter-btn active" data-filter="all">전체</button>
+        <button class="filter-btn" data-filter="sin">사인</button>
+        <button class="filter-btn" data-filter="cos">코사인</button>
+        <button class="filter-btn" data-filter="tan">탄젠트</button>
+      </div>
+
+      <div class="problems-grid" id="problems-grid">
+
+        <!-- Problem 1 -->
+        <div class="problem-card" data-type="sin">
+          <div class="problem-header">
+            <div class="problem-meta">
+              <span class="problem-type sin-badge">사인</span>
+              <span class="problem-level killer">킬러</span>
+            </div>
+            <div class="problem-number">문제 1</div>
+          </div>
+          <div class="problem-body">
+            <div class="problem-statement">
+              함수 <span class="inline-math">f(x) = |2sin(2(x−1))|</span>의 그래프와 직선 <span class="inline-math">y = mx + n</span>의 교점의 개수가 <strong>정확히 5개</strong>가 되도록 하는 m, n의 조건을 탐구하시오. (단, 0 ≤ x ≤ 10)
+            </div>
+            <div class="problem-hint">
+              <div class="hint-title">💡 풀이 접근법</div>
+              <ol>
+                <li>A=2, B=2, C=1, D=0 → 주기 = π ≈ 3.14</li>
+                <li>x∈[0,10]에 약 3.18 주기 포함 → 최대 교점 6~7개</li>
+                <li>5개가 되려면 마지막 주기에서 교점 1개 조건 필요</li>
+                <li>m ≈ 0.3~0.5, n ≈ 0.5~1.0 구간 탐구</li>
+              </ol>
+            </div>
+            <div class="problem-answer">
+              <div class="answer-title">▶ 핵심 조건</div>
+              <div class="answer-content">x=1+π/4≈1.785에서 최대값 2. 직선이 이 점을 접선처럼 통과 → 해당 봉우리에서 교점 1개.</div>
+            </div>
+          </div>
+          <button class="sim-btn" data-func="sin" data-A="2" data-B="2" data-C="1" data-D="0" data-m="0.3" data-n="0.8">
+            📊 시뮬레이터에서 확인
+          </button>
+        </div>
+
+        <!-- Problem 2 -->
+        <div class="problem-card" data-type="sin">
+          <div class="problem-header">
+            <div class="problem-meta">
+              <span class="problem-type sin-badge">사인</span>
+              <span class="problem-level junkiller">준킬러</span>
+            </div>
+            <div class="problem-number">문제 2</div>
+          </div>
+          <div class="problem-body">
+            <div class="problem-statement">
+              함수 <span class="inline-math">f(x) = |sin(x) − 0.5|</span>의 그래프와 직선 <span class="inline-math">y = 0.1x + 0.3</span>의 교점의 개수를 구하고, D값을 변화시키면서 교점 수 변화를 관찰하시오.
+            </div>
+            <div class="problem-hint">
+              <div class="hint-title">💡 핵심 개념: 폴딩포인트 (D값)</div>
+              <ol>
+                <li>D=−0.5이면 sin(x)=0.5일 때 꺾임 발생</li>
+                <li>D=0 → D=−1로 변화시키며 꺾임 위치와 교점 수 변화 관찰</li>
+                <li>D=−1에 가까울수록 그래프가 평탄해짐</li>
+              </ol>
+            </div>
+            <div class="problem-answer">
+              <div class="answer-title">▶ 관찰 포인트</div>
+              <div class="answer-content">D=−0.5에서 교점 약 3~4개. D→−1이면 그래프 평탄화로 교점 수 감소.</div>
+            </div>
+          </div>
+          <button class="sim-btn" data-func="sin" data-A="1" data-B="1" data-C="0" data-D="-0.5" data-m="0.1" data-n="0.3">
+            📊 시뮬레이터에서 확인
+          </button>
+        </div>
+
+        <!-- Problem 3 -->
+        <div class="problem-card" data-type="sin">
+          <div class="problem-header">
+            <div class="problem-meta">
+              <span class="problem-type sin-badge">사인</span>
+              <span class="problem-level killer">킬러</span>
+            </div>
+            <div class="problem-number">문제 3 (기출 유형)</div>
+          </div>
+          <div class="problem-body">
+            <div class="problem-statement">
+              실수 t에 대하여 <span class="inline-math">f(x) = |sin(2x) + t|</span>의 그래프와 직선 <span class="inline-math">y = (1/4)x</span>의 교점의 개수를 g(t)라 할 때, g(t)가 불연속인 t의 값의 개수를 구하시오.
+            </div>
+            <div class="problem-hint">
+              <div class="hint-title">💡 풀이 전략</div>
+              <ol>
+                <li>t=D로 설정, D를 −1~1 사이에서 조금씩 변경</li>
+                <li>교점 수가 갑자기 바뀌는 t값 탐색</li>
+                <li>t=0, ±1이 불연속 후보</li>
+              </ol>
+            </div>
+            <div class="problem-answer">
+              <div class="answer-title">▶ 힌트</div>
+              <div class="answer-content">D=−1: |sin(2x)−1|=0인 점에서 직선과 접하면 불연속. t∈{−1,0,1} 각각 확인.</div>
+            </div>
+          </div>
+          <button class="sim-btn" data-func="sin" data-A="1" data-B="2" data-C="0" data-D="-1" data-m="0.25" data-n="0">
+            📊 시뮬레이터에서 확인
+          </button>
+        </div>
+
+        <!-- Problem 4 -->
+        <div class="problem-card" data-type="cos">
+          <div class="problem-header">
+            <div class="problem-meta">
+              <span class="problem-type cos-badge">코사인</span>
+              <span class="problem-level junkiller">준킬러</span>
+            </div>
+            <div class="problem-number">문제 4</div>
+          </div>
+          <div class="problem-body">
+            <div class="problem-statement">
+              함수 <span class="inline-math">f(x) = |cos(x) + 0.5|</span>의 그래프와 직선 <span class="inline-math">y = mx + 0.5</span> (m &gt; 0)의 교점의 개수가 <strong>홀수</strong>가 되도록 하는 m의 범위를 탐구하시오. (0 ≤ x ≤ 3π)
+            </div>
+            <div class="problem-hint">
+              <div class="hint-title">💡 풀이 접근법</div>
+              <ol>
+                <li>D=0.5 → cos(x)+0.5=0 → x=2π/3, 4π/3, ...에서 꺾임</li>
+                <li>꺾임점에서 직선이 접하면 교점 수 홀수 가능</li>
+                <li>m을 0.05에서 천천히 증가시키며 교점 수 변화 관찰</li>
+              </ol>
+            </div>
+            <div class="problem-answer">
+              <div class="answer-title">▶ 관찰 포인트</div>
+              <div class="answer-content">m이 매우 작으면 교점 6개(짝수), m 증가 시 마지막 주기에서 5개(홀수) 구간 존재. m≈0.15~0.25 집중 탐구.</div>
+            </div>
+          </div>
+          <button class="sim-btn" data-func="cos" data-A="1" data-B="1" data-C="0" data-D="0.5" data-m="0.15" data-n="0.5">
+            📊 시뮬레이터에서 확인
+          </button>
+        </div>
+
+        <!-- Problem 5 -->
+        <div class="problem-card" data-type="cos">
+          <div class="problem-header">
+            <div class="problem-meta">
+              <span class="problem-type cos-badge">코사인</span>
+              <span class="problem-level killer">킬러</span>
+            </div>
+            <div class="problem-number">문제 5</div>
+          </div>
+          <div class="problem-body">
+            <div class="problem-statement">
+              함수 <span class="inline-math">f(x) = |1.5·cos(1.5x) − 0.5|</span>의 그래프와 직선 <span class="inline-math">y = mx + n</span>의 교점의 개수가 <strong>정확히 7개</strong>가 되는 (m, n) 쌍을 시뮬레이터로 구하시오. (0 ≤ x ≤ 10)
+            </div>
+            <div class="problem-hint">
+              <div class="hint-title">💡 풀이 전략</div>
+              <ol>
+                <li>B=1.5 → 주기 ≈ 4.19. x∈[0,10]에서 약 2.39 주기</li>
+                <li>D=−0.5 → cos(1.5x)=1/3일 때 꺾임</li>
+                <li>최댓값 = 2.0. 직선이 완만하게 증가해야 7개 달성 가능</li>
+              </ol>
+            </div>
+            <div class="problem-answer">
+              <div class="answer-title">▶ 탐구 영역</div>
+              <div class="answer-content">m≈0.2~0.3, n≈0~0.5 구간 탐구. 7개는 마지막 반주기에서 직선이 한 번 더 만나는 특수 기울기 조건.</div>
+            </div>
+          </div>
+          <button class="sim-btn" data-func="cos" data-A="1.5" data-B="1.5" data-C="0" data-D="-0.5" data-m="0.25" data-n="0.3">
+            📊 시뮬레이터에서 확인
+          </button>
+        </div>
+
+        <!-- Problem 6 -->
+        <div class="problem-card" data-type="cos">
+          <div class="problem-header">
+            <div class="problem-meta">
+              <span class="problem-type cos-badge">코사인</span>
+              <span class="problem-level killer">킬러</span>
+            </div>
+            <div class="problem-number">문제 6 (기출 유형)</div>
+          </div>
+          <div class="problem-body">
+            <div class="problem-statement">
+              함수 <span class="inline-math">f(x) = |cos(2(x−1))|</span>의 그래프와 직선 <span class="inline-math">y = k</span> (상수)의 교점의 개수가 <strong>짝수</strong>인 양의 정수 중 최댓값 k를 구하시오.
+            </div>
+            <div class="problem-hint">
+              <div class="hint-title">💡 풀이 접근법</div>
+              <ol>
+                <li>B=2, C=1 → 주기 π/2≈1.57. x=1에서 cos(0)=1 시작</li>
+                <li>수평선 y=k (m=0, n=k)와의 교점 분석</li>
+                <li>k=1: cos=1인 점에서만 접함 → 홀수</li>
+                <li>k=0.5: 각 주기에서 2개 교점 → 짝수</li>
+              </ol>
+            </div>
+            <div class="problem-answer">
+              <div class="answer-title">▶ 관찰 포인트</div>
+              <div class="answer-content">m=0으로 설정하고 n(=k)을 조절. n=1에서 홀수, n=0.9에서 짝수 확인.</div>
+            </div>
+          </div>
+          <button class="sim-btn" data-func="cos" data-A="1" data-B="2" data-C="1" data-D="0" data-m="0" data-n="0.7">
+            📊 시뮬레이터에서 확인
+          </button>
+        </div>
+
+        <!-- Problem 7 -->
+        <div class="problem-card" data-type="tan">
+          <div class="problem-header">
+            <div class="problem-meta">
+              <span class="problem-type tan-badge">탄젠트</span>
+              <span class="problem-level junkiller">준킬러</span>
+            </div>
+            <div class="problem-number">문제 7</div>
+          </div>
+          <div class="problem-body">
+            <div class="problem-statement">
+              함수 <span class="inline-math">f(x) = |tan(x)|</span>의 그래프와 직선 <span class="inline-math">y = mx + n</span>이 0 ≤ x ≤ 3π에서 갖는 교점의 개수를 m값에 따라 분류하시오. (단, m &gt; 0)
+            </div>
+            <div class="problem-hint">
+              <div class="hint-title">💡 핵심 개념</div>
+              <ol>
+                <li>|tan(x)|의 주기=π/2. x∈[0,3π]에서 6개의 "V 패턴"</li>
+                <li>각 V: 0에서 시작 → +∞로 발산 (점근선에서)</li>
+                <li>m이 클수록 각 V와의 교점 수 감소</li>
+                <li>m이 매우 작으면 총 최대 12개 가능</li>
+              </ol>
+            </div>
+            <div class="problem-answer">
+              <div class="answer-title">▶ 분류 기준</div>
+              <div class="answer-content">m&lt;1: 각 구간에서 교점 2개 가능. m=1: 일부 감소. m&gt;1: 후반 구간에서 교점 없음.</div>
+            </div>
+          </div>
+          <button class="sim-btn" data-func="tan" data-A="1" data-B="1" data-C="0" data-D="0" data-m="0.3" data-n="0">
+            📊 시뮬레이터에서 확인
+          </button>
+        </div>
+
+        <!-- Problem 8 -->
+        <div class="problem-card" data-type="tan">
+          <div class="problem-header">
+            <div class="problem-meta">
+              <span class="problem-type tan-badge">탄젠트</span>
+              <span class="problem-level killer">킬러</span>
+            </div>
+            <div class="problem-number">문제 8</div>
+          </div>
+          <div class="problem-body">
+            <div class="problem-statement">
+              함수 <span class="inline-math">f(x) = |tan(2x) + 0.5|</span>의 그래프와 직선 <span class="inline-math">y = 0.5x + n</span>의 교점의 개수가 <strong>정확히 4개</strong>가 되는 n의 범위를 구하시오. (0 ≤ x ≤ 4)
+            </div>
+            <div class="problem-hint">
+              <div class="hint-title">💡 풀이 전략</div>
+              <ol>
+                <li>B=2 → |tan(2x)|의 주기=π/4≈0.785. x∈[0,4]에서 약 5개 주기</li>
+                <li>D=0.5 → tan(2x)=−0.5일 때 꺾임</li>
+                <li>n 슬라이더를 −1에서 2까지 조절하며 교점=4 범위 탐색</li>
+              </ol>
+            </div>
+            <div class="problem-answer">
+              <div class="answer-title">▶ 탐구 영역</div>
+              <div class="answer-content">n≈0.5~1.5 구간에서 교점 4개 가능. n이 너무 크면 초반 주기에서만 교점.</div>
+            </div>
+          </div>
+          <button class="sim-btn" data-func="tan" data-A="1" data-B="2" data-C="0" data-D="0.5" data-m="0.5" data-n="1.0">
+            📊 시뮬레이터에서 확인
+          </button>
+        </div>
+
+        <!-- Problem 9 -->
+        <div class="problem-card" data-type="tan">
+          <div class="problem-header">
+            <div class="problem-meta">
+              <span class="problem-type tan-badge">탄젠트</span>
+              <span class="problem-level killer">킬러</span>
+            </div>
+            <div class="problem-number">문제 9 (기출 유형)</div>
+          </div>
+          <div class="problem-body">
+            <div class="problem-statement">
+              함수 <span class="inline-math">f(x) = |tan(x − π/4)|</span>의 그래프와 직선 <span class="inline-math">y = (1/π)x</span>의 교점의 개수를 구하고, 교점의 x좌표의 합 S에 대하여 ⌊S⌋를 구하시오. (0 ≤ x ≤ 3π)
+            </div>
+            <div class="problem-hint">
+              <div class="hint-title">💡 풀이 접근법</div>
+              <ol>
+                <li>C=π/4≈0.785. 점근선: x=3π/4+nπ</li>
+                <li>1/π≈0.318. 이 기울기의 직선과 각 V패턴 분석</li>
+                <li>시뮬레이터에서 C=0.785, m≈0.318로 근사</li>
+              </ol>
+            </div>
+            <div class="problem-answer">
+              <div class="answer-title">▶ 시뮬레이터 설정</div>
+              <div class="answer-content">C≈0.8, m≈0.32, n=0. 교점 좌표 합산 후 내림. 정확한 값은 이론적 분석 필요.</div>
+            </div>
+          </div>
+          <button class="sim-btn" data-func="tan" data-A="1" data-B="1" data-C="0.8" data-D="0" data-m="0.32" data-n="0">
+            📊 시뮬레이터에서 확인
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="site-footer">
+    <div class="footer-content">
+      <p>수능 수학 킬러 대비 | 복합 삼각함수 × 직선 교점 시뮬레이터</p>
+      <p class="footer-sub">그래프는 수치적 방법(이분법)으로 교점을 탐지합니다. 정확한 계산은 이론적 분석과 병행하세요.</p>
+    </div>
+  </footer>
+
+  <script src="simulator.js"></script>
+</body>
+</html>
