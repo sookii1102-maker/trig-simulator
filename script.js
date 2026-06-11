@@ -20,6 +20,7 @@ const Y_MAX = 3;
 const INTERSECTION_MAX_Y = 100;
 const PLOT_MAX_Y = 20;
 const DUPLICATE_THRESHOLD = 0.02;
+const TIP_ROTATION_INTERVAL_MS = 8000;
 
 // ─────────────────────────────────────────────
 //  CANVAS SETUP
@@ -377,7 +378,7 @@ const TIPS = {
     'y=k(수평선) 형태로 설정하면 교점=k와 극값의 관계를 명확히 볼 수 있습니다.',
   ],
   tan: [
-    '|tan(x)|의 주기는 π/2로, 사인/코사인 절반입니다.',
+    '|tan(x)|의 주기는 π/2로, 사인/코사인 주기(2π)의 1/4입니다.',
     '점근선(tan→∞) 근처에서 교점은 항상 최소 1개 이상 발생합니다.',
     'D를 조절하면 각 V-패턴의 최솟값 위치가 달라집니다.',
     '기울기 m이 클수록 후반부 구간에서 교점이 줄어듭니다.',
@@ -393,7 +394,7 @@ function updateTip(count) {
     tipEl.textContent = '⚠️ 교점이 없습니다. 직선의 y절편(n)을 높이거나 기울기(m)를 줄여보세요.';
   } else {
     const tips = TIPS[state.funcType];
-    const idx  = Math.floor(Date.now() / 8000) % tips.length;
+    const idx  = Math.floor(Date.now() / TIP_ROTATION_INTERVAL_MS) % tips.length;
     tipEl.textContent = tips[idx];
   }
 }
@@ -647,12 +648,14 @@ function applySimState(A, B, C, D, m, n, func) {
 document.querySelectorAll('.sim-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     const func = btn.dataset.func;
-    const A = parseFloat(btn.dataset.a ?? btn.dataset.A ?? 1);
-    const B = parseFloat(btn.dataset.b ?? btn.dataset.B ?? 1);
-    const C = parseFloat(btn.dataset.c ?? btn.dataset.C ?? 0);
-    const D = parseFloat(btn.dataset.d ?? btn.dataset.D ?? 0);
-    const m = parseFloat(btn.dataset.m ?? 0.3);
-    const n = parseFloat(btn.dataset.n ?? 0);
+    const getDataNumber = (key, fallback) =>
+      parseFloat(btn.dataset[key] ?? btn.dataset[key.toUpperCase()] ?? fallback);
+    const A = getDataNumber('a', 1);
+    const B = getDataNumber('b', 1);
+    const C = getDataNumber('c', 0);
+    const D = getDataNumber('d', 0);
+    const m = getDataNumber('m', 0.3);
+    const n = getDataNumber('n', 0);
     applySimState(A, B, C, D, m, n, func);
   });
 });
