@@ -385,7 +385,6 @@ const TIPS = {
   ],
 };
 
-let tipCycleTimer = null;
 function updateTip(count) {
   const tipEl = document.getElementById('tip-text');
   if (!tipEl) return;
@@ -413,7 +412,12 @@ function updateFormulaDisplay() {
 
   trigEl.textContent = `y = |${inner}|`;
 
-  const mStr = m === 0  ? '0' : `${m.toFixed(2)}x`;
+  if (m === 0) {
+    lineEl.textContent = `y = ${n === 0 ? '0' : n.toFixed(1)}`;
+    return;
+  }
+
+  const mStr = `${m.toFixed(2)}x`;
   const nStr = n === 0  ? '' : (n > 0 ? ` + ${n.toFixed(1)}` : ` - ${Math.abs(n).toFixed(1)}`);
   lineEl.textContent = `y = ${mStr}${nStr}`;
 }
