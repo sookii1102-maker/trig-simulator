@@ -17,6 +17,9 @@ const X_MIN = 0;
 const X_MAX = 10;
 const Y_MIN = -3;
 const Y_MAX = 3;
+const INTERSECTION_MAX_Y = 100;
+const PLOT_MAX_Y = 20;
+const DUPLICATE_THRESHOLD = 0.02;
 
 // ─────────────────────────────────────────────
 //  CANVAS SETUP
@@ -101,11 +104,10 @@ function findIntersections(A, B, C, D, m, n, type) {
   const SAMPLES = getSamples();
   const step   = (X_MAX - X_MIN) / SAMPLES;
   const EPS    = 1e-9;
-  const MAX_Y  = 100; // tan 점근선 필터
 
   function diff(x) {
     const ty = evalTrig(x, A, B, C, D, type);
-    if (!isFinite(ty) || ty > MAX_Y) return NaN;
+    if (!isFinite(ty) || ty > INTERSECTION_MAX_Y) return NaN;
     return ty - evalLine(x, m, n);
   }
 
@@ -136,7 +138,7 @@ function findIntersections(A, B, C, D, m, n, type) {
 
       const px = (lo + hi) * 0.5;
       const py = evalLine(px, m, n);
-      const isDup = pts.some(p => Math.abs(p.x - px) < 0.02);
+      const isDup = pts.some(p => Math.abs(p.x - px) < DUPLICATE_THRESHOLD);
       if (!isDup && px >= X_MIN && px <= X_MAX && isFinite(py)) {
         pts.push({ x: px, y: py });
       }
@@ -316,7 +318,6 @@ function draw() {
 
 // 삼각함수 경로 그리기 헬퍼
 function _plotFunction(evalFn, A, B, C, D, type, steps, isAbs) {
-  const MAX_Y = 20;
   let first    = true;
 
   ctx.beginPath();
@@ -324,7 +325,7 @@ function _plotFunction(evalFn, A, B, C, D, type, steps, isAbs) {
     const x  = X_MIN + (i / steps) * (X_MAX - X_MIN);
     const ry = evalFn(x, A, B, C, D, type);
 
-    if (!isFinite(ry) || Math.abs(ry) > MAX_Y) {
+    if (!isFinite(ry) || Math.abs(ry) > PLOT_MAX_Y) {
       first = true; continue;
     }
 
@@ -405,14 +406,14 @@ function updateFormulaDisplay() {
 
   const Astr  = A === 1  ? '' : A.toFixed(1);
   const Bstr  = B === 1  ? '' : B.toFixed(1);
-  const Cstr  = C === 0  ? 'x' : (C > 0 ? `(x−${C.toFixed(1)})` : `(x+${Math.abs(C).toFixed(1)})`);
-  const Dstr  = D === 0  ? '' : (D > 0 ? ` + ${D.toFixed(1)}` : ` − ${Math.abs(D).toFixed(1)}`);
+  const Cstr  = C === 0  ? 'x' : (C > 0 ? `(x-${C.toFixed(1)})` : `(x+${Math.abs(C).toFixed(1)})`);
+  const Dstr  = D === 0  ? '' : (D > 0 ? ` + ${D.toFixed(1)}` : ` - ${Math.abs(D).toFixed(1)}`);
   const inner = `${Astr}${funcType}(${Bstr}${Cstr})${Dstr}`;
 
   trigEl.textContent = `y = |${inner}|`;
 
   const mStr = m === 0  ? '0' : `${m.toFixed(2)}x`;
-  const nStr = n === 0  ? '' : (n > 0 ? ` + ${n.toFixed(1)}` : ` − ${Math.abs(n).toFixed(1)}`);
+  const nStr = n === 0  ? '' : (n > 0 ? ` + ${n.toFixed(1)}` : ` - ${Math.abs(n).toFixed(1)}`);
   lineEl.textContent = `y = ${mStr}${nStr}`;
 }
 
